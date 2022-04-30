@@ -55,13 +55,15 @@
 #define	RECV    	0
 #define	SEND    	1
 
-#define	FRQ_REG     frq_reg430
+//#define	FRQ_REG     frq_reg430
+#define	FRQ_REG     frq_reg50a
 
 
 // reference
 // https://aitendo3.sakura.ne.jp/aitendo_data/product_img/ic/wirless/BK4802P/BK4802N-BEKEN.pdf
 // http://pdf-html.ic37.com/pdf_file_U1/20200531/pdf_pdf/uploadpdf/ETC/BK4802_datasheet_1240666/202073/BK4802_datasheet.pdf
 // https://github.com/BG7QKU/BK4802P-4BANDS-FM-TRANSCEIVER-WITH-BLUETOOTH-CONTROL-BASED-STC8F-MCU/blob/master/MCUMAIN
+// https://github.com/BG7QKU/BK4802N-EEPROM-CALC-V0.1
 
 void port_init(void) {
     /* CONFIGURE GPIO */ 
@@ -177,52 +179,24 @@ void rcv_chk(void)
     };
 
     // 29.18M
-    const uint16_t frq_reg28x[3] = {
-        0x5778,
-        0x7ea3,
-        0xa000
-    };
-
-    // 29.18M
     const uint16_t frq_reg28a[3] = {
         0x5778,
         0x7ea3,
-        0xa000
-    };
-
-    // 29.18M
-    const uint16_t frq_reg28b[3] = {
-        0x6267,
-        0x8e77,
-        0xc000
-    };
-
-    // 51.18M
-    const uint16_t frq_reg50x[3] = {
-        0x4cdd,
-        0x6072,
-        0x6000
+        0xc00f
     };
 
     // 51.18M
     const uint16_t frq_reg50a[3] = {
-        0x4cdd,
-        0x6072,
-        0x4000
-    };
-
-    // 51.18M
-    const uint16_t frq_reg50b[3] = {
         0x5679,
         0x0c81,
-        0x6000
+        0x8008
     };
 
     // 145.18M
     const uint16_t frq_reg144[3] = {
         0x51e8,
         0x1940,
-        0x2000
+        0x2002
     };
 
     // 433.18M
@@ -232,7 +206,14 @@ void rcv_chk(void)
         0x0000
     };
         
-// set
+    // 432.98M
+    const uint16_t frq_reg433[3] = {
+        0x5179,
+        0xf0b9,
+        0x0000
+    };
+
+    // set
     for(uint8_t lp = 4; lp < 24; lp++){
     
     // Start
@@ -285,12 +266,10 @@ void rcv_chk(void)
         data = (uint8_t)(adr & 0xFF);
         i2c_snd(data);	
     // 	
-        data = (uint8_t)((frq_reg430[adr] >> 8) & 0xFF);
-//        data = (uint8_t)((frq_reg50x[adr] >> 8) & 0xFF);
+        data = (uint8_t)((FRQ_REG[adr] >> 8) & 0xFF);
         i2c_snd(data);	
     // 
-        data = (uint8_t)(frq_reg430[adr] & 0xFF);
-//        data = (uint8_t)(frq_reg50x[adr] & 0xFF);
+        data = (uint8_t)(FRQ_REG[adr] & 0xFF);
         i2c_snd(data);	
     // Stop            
         SCK_HIGH;
@@ -333,58 +312,37 @@ void snd_chk(void)
     };
 
     // 29.18M
-    const uint16_t frq_reg28x[3] = {
-        0x57e2,
-        0x1f90,
-        0xc000
-    };
-
-    // 29.18M
     const uint16_t frq_reg28a[3] = {
         0x57e2,
         0x1f90,
-        0xa000
-    };
-
-    // 29.18M
-    const uint16_t frq_reg28b[3] = {
-        0x62de,
-        0x6382,
-        0xc000
-    };
-
-    // 51.18M
-    const uint16_t frq_reg50x[3] = {
-        0x4d12,
-        0x30e9,
-        0x6000
+        0xc00f
     };
 
      // 51.18M
     const uint16_t frq_reg50a[3] = {
-        0x4d12,
-        0x30e9,
-        0x4000
-    };
-
-   // 51.18M
-    const uint16_t frq_reg50b[3] = {
-        0x57d2,
-        0xb3fb,
-        0x6000
+        0x56b4,
+        0x7706,
+        0x8008
     };
 
     // 145.18M
     const uint16_t frq_reg144[3] = {
         0x51fb,
         0xe76c,
-        0x2000
+        0x2002
     };
 
     // 433.18M
     const uint16_t frq_reg430[3] = {
         0x518a,
         0x2e05,
+        0x0000
+    };
+
+    // 432.98M
+    const uint16_t frq_reg433[3] = {
+        0x5180,
+        0x8ac8,
         0x0000
     };
 
@@ -441,12 +399,10 @@ void snd_chk(void)
         data = (uint8_t)(adr & 0xFF );
         i2c_snd(data);	
     // 	
-        data = (uint8_t)((frq_reg430[adr] >> 8) & 0xFF );
-//        data = (uint8_t)((frq_reg50a[adr] >> 8) & 0xFF );
+        data = (uint8_t)((FRQ_REG[adr] >> 8) & 0xFF );
         i2c_snd(data);	
     // 
-        data = (uint8_t)(frq_reg430[adr] & 0xFF );
-//        data = (uint8_t)(frq_reg50a[adr] & 0xFF );
+        data = (uint8_t)(FRQ_REG[adr] & 0xFF );
         i2c_snd(data);	
     // Stop            
         SCK_HIGH;
@@ -484,21 +440,18 @@ void main(void) {
             if(flag == RECV){
                 snd_chk();
                 flag = SEND;
-//                snd_chk();
             }
             __delay_ms(200);
             LED_OFF;
             __delay_ms(50);
 // RX
         } else {
-//            if(flag == SEND){
-                rcv_chk();
-                flag = RECV;
-//            }
+            rcv_chk();
+            flag = RECV;
             __delay_ms(50);
             LED_OFF;
             __delay_ms(200);
         }
 //        __delay_ms(200);                
-    }
+    }111
 }
