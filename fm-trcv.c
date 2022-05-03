@@ -1,5 +1,5 @@
-/* 
- * FM transceiver for PIC12F1501
+    /* 
+ * FM transceiver for PIC12F1612
  *
  *      JK1MLY:Hidekazu Inaba
  *
@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <xc.h>
 #include <pic.h>
-#include <pic12F1501.h>
+//#include <pic12F1612.h>
 
 #define _XTAL_FREQ 8000000
 // CONFIG1
@@ -55,8 +55,7 @@
 #define	RECV    	0
 #define	SEND    	1
 
-//#define	FRQ_REG     frq_reg430
-#define	FRQ_REG     frq_reg50a
+#define	FRQ_REG     frq_reg430
 
 
 // reference
@@ -147,7 +146,7 @@ void vol_set(void)
         __delay_us(20);
 }
 
-void rcv_chk(void)
+void rcv_chk(uint8_t freg)
 {
 	uint8_t data;
 
@@ -247,9 +246,27 @@ void rcv_chk(void)
 
 // Freq
     for(uint8_t lp = 0; lp < 3; lp++){
+        uint16_t fdat;
         uint8_t adr;
-        adr = 2 - lp;
-    
+        adr = (uint8_t)(2 - lp);
+
+        switch (freg){
+            case 1:
+                fdat = frq_reg28a[adr];
+                break;
+            case 2:
+                fdat = frq_reg50a[adr];
+                break;
+            case 3:
+                fdat = frq_reg144[adr];
+                break;
+            case 4:
+                fdat = frq_reg433[adr];
+                break;
+            default:
+                fdat = frq_reg430[adr];
+        }
+        
     // Start
         SDA_HIGH;
         __delay_us(2);
@@ -266,10 +283,10 @@ void rcv_chk(void)
         data = (uint8_t)(adr & 0xFF);
         i2c_snd(data);	
     // 	
-        data = (uint8_t)((FRQ_REG[adr] >> 8) & 0xFF);
+        data = (uint8_t)((fdat >> 8) & 0xFF);
         i2c_snd(data);	
     // 
-        data = (uint8_t)(FRQ_REG[adr] & 0xFF);
+        data = (uint8_t)(fdat & 0xFF);
         i2c_snd(data);	
     // Stop            
         SCK_HIGH;
@@ -280,7 +297,7 @@ void rcv_chk(void)
     }    
 }
 
-void snd_chk(void)
+void snd_chk(uint8_t freg)
 {
 	uint8_t data;
 
@@ -380,9 +397,27 @@ void snd_chk(void)
 
 // Freq
     for(uint8_t lp = 0; lp < 3; lp++){
+        uint16_t fdat;
         uint8_t adr;
-        adr = 2 - lp;
-    
+        adr = (uint8_t)(2 - lp);
+
+        switch (freg){
+            case 1:
+                fdat = frq_reg28a[adr];
+                break;
+            case 2:
+                fdat = frq_reg50a[adr];
+                break;
+            case 3:
+                fdat = frq_reg144[adr];
+                break;
+            case 4:
+                fdat = frq_reg433[adr];
+                break;
+            default:
+                fdat = frq_reg430[adr];
+        }
+
     // Start
         SDA_HIGH;
         __delay_us(2);
@@ -399,10 +434,10 @@ void snd_chk(void)
         data = (uint8_t)(adr & 0xFF );
         i2c_snd(data);	
     // 	
-        data = (uint8_t)((FRQ_REG[adr] >> 8) & 0xFF );
+        data = (uint8_t)((fdat >> 8) & 0xFF );
         i2c_snd(data);	
     // 
-        data = (uint8_t)(FRQ_REG[adr] & 0xFF );
+        data = (uint8_t)(fdat & 0xFF );
         i2c_snd(data);	
     // Stop            
         SCK_HIGH;
@@ -416,6 +451,7 @@ void snd_chk(void)
 void main(void) {
 
     uint8_t flag = RECV;
+    uint8_t freg = 4;
 
 //Initialize
 	port_init();
@@ -424,21 +460,33 @@ void main(void) {
 //    snd_chk();
 //    __delay_ms(1000);
     vol_set();
-    rcv_chk();
+    rcv_chk(freg);
     
 //Loop    
     while(1){
-        if(BAND == SWON){
+/*        if(BAND == SWON){
             LED_ON;
+            if(freg >3){
+                freg = 0;
+            } else {
+                freg++;
+            }
             __delay_ms(1000);        
             LED_OFF;
-        }
+            __delay_ms(100);        
+            for(uint8_t lp = 1; lp < (freg + 1); lp++){
+                LED_ON;
+                __delay_ms(100);        
+                LED_OFF;
+                __delay_ms(100);        
+            }
+        }*/
 
         LED_ON;
         if(PTT == SWON){
 // TX
             if(flag == RECV){
-                snd_chk();
+                snd_chk(freg);
                 flag = SEND;
             }
             __delay_ms(200);
@@ -446,12 +494,11 @@ void main(void) {
             __delay_ms(50);
 // RX
         } else {
-            rcv_chk();
+            rcv_chk(freg);
             flag = RECV;
             __delay_ms(50);
             LED_OFF;
             __delay_ms(200);
         }
-//        __delay_ms(200);                
-    }111
+    }
 }
