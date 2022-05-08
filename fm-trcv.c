@@ -14,7 +14,6 @@
 */
 
 #include <stdio.h>
-//#include <c90/stdlib.h>
 #include <stdint.h>
 #include <xc.h>
 #include <pic.h>
@@ -55,7 +54,7 @@
 #define	RECV    	0
 #define	SEND    	1
 
-#define	FRQ_REG     frq_reg430
+#define	FRQ_REG     frq_pkt430
 
 
 // reference
@@ -191,6 +190,13 @@ void rcv_chk(uint8_t freg)
         0x8008
     };
 
+    // 144.66M
+    const uint16_t frq_pkt144[3] = {
+        0x519c,
+        0xeccc,
+        0x2002
+    };
+        
     // 145.18M
     const uint16_t frq_reg144[3] = {
         0x51e8,
@@ -198,6 +204,13 @@ void rcv_chk(uint8_t freg)
         0x2002
     };
 
+    // 431.04M
+    const uint16_t frq_pkt430[3] = {
+        0x511c,
+        0x7484,
+        0x0000
+    };
+        
     // 433.18M
     const uint16_t frq_reg430[3] = {
         0x5183,
@@ -249,23 +262,7 @@ void rcv_chk(uint8_t freg)
         uint16_t fdat;
         uint8_t adr;
         adr = (uint8_t)(2 - lp);
-
-        switch (freg){
-            case 1:
-                fdat = frq_reg28a[adr];
-                break;
-            case 2:
-                fdat = frq_reg50a[adr];
-                break;
-            case 3:
-                fdat = frq_reg144[adr];
-                break;
-            case 4:
-                fdat = frq_reg433[adr];
-                break;
-            default:
-                fdat = frq_reg430[adr];
-        }
+        fdat = frq_pkt430[adr];
         
     // Start
         SDA_HIGH;
@@ -342,11 +339,25 @@ void snd_chk(uint8_t freg)
         0x8008
     };
 
+    // 144.66M
+    const uint16_t frq_pkt144[3] = {
+        0x5180,
+        0xbaf8,
+        0x2002
+    };
+
     // 145.18M
     const uint16_t frq_reg144[3] = {
         0x51fb,
         0xe76c,
         0x2002
+    };
+
+    // 431.04M
+    const uint16_t frq_pkt430[3] = {
+        0x5123,
+        0x0e93,
+        0x0000
     };
 
     // 433.18M
@@ -400,23 +411,7 @@ void snd_chk(uint8_t freg)
         uint16_t fdat;
         uint8_t adr;
         adr = (uint8_t)(2 - lp);
-
-        switch (freg){
-            case 1:
-                fdat = frq_reg28a[adr];
-                break;
-            case 2:
-                fdat = frq_reg50a[adr];
-                break;
-            case 3:
-                fdat = frq_reg144[adr];
-                break;
-            case 4:
-                fdat = frq_reg433[adr];
-                break;
-            default:
-                fdat = frq_reg430[adr];
-        }
+        fdat = frq_pkt430[adr];
 
     // Start
         SDA_HIGH;
